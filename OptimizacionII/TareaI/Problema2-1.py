@@ -37,10 +37,10 @@ Z1 = X #np.exp(-X**2 - Y**2)
 Z2 = Y #np.exp(-(X - 1)**2 - (Y - 1)**2)
 
 Z = (Z1 * Z2) 
-gradientf = [-1.0/np.sqrt(2.0), 1.0/np.sqrt(2.0)]
-xoptimal = [-1.0/np.sqrt(2.0), 1.0/np.sqrt(2.0)]
-c1optimal = [2.0/np.sqrt(2.0), -2.0/np.sqrt(2.0)]
-lambda1 = [1.0/2, -1.0/2]
+xoptimal = [1.0/np.sqrt(2.0), -1.0/np.sqrt(2.0)]
+gradientf = [xoptimal[1], xoptimal[0]]
+gradientc1 = [2.0/np.sqrt(2.0), -2.0/np.sqrt(2.0)]
+lambda1 = [1.0/2.0, -1.0/2.0]
 ###############################################################################
 # Create a simple contour plot with labels using default colors.  The
 # inline argument to clabel will control whether the labels are draw
@@ -50,7 +50,7 @@ lambda1 = [1.0/2, -1.0/2]
 fig, ax = plt.subplots()
 CS = ax.contour(X, Y, Z)
 ax.clabel(CS, inline=100, fontsize=10)
-ax.set_title('Optimizacion con restricciones')
+ax.set_title('Optimizacion con restricciones $min \quad x_1 x_2 \quad s.a. \quad x_1^2 + x_2^2 = 1$')
 
 
 ###Conjunto factible
@@ -71,22 +71,22 @@ plt.scatter(ss, ts, color='orange', cmap='jet', label='$Conjunto \quad factible$
 plt.ylim(miny, maxy)
 
 # plot the possible (s, t) pairs
-pairs = [(s, t) for s in np.linspace(minx, maxx,200)
-                for t in np.linspace(miny, maxy, 200)
+pairs = [(s, t) for s in np.linspace(minx, maxx,500)
+                for t in np.linspace(miny, maxy, 500)
                 if np.sqrt(1-(s**2)) == 0]
 ss, ts = np.hsplit(np.array(pairs), 2)
 
 # plot the results
 #plt.scatter(ss, ts,color='gray' , cmap='jet', label='$Region \quad factible$', zorder=3, alpha=0.1,edgecolors='none' )
-plt.plot( xoptimal[0], xoptimal[1], marker='o', color="red", label='$x^* = [ \\frac{-1}{\\sqrt{2}}, \\frac{1}{\\sqrt{2}}]^T$',markersize= 5 )
+plt.plot( xoptimal[0], xoptimal[1], marker='o', color="red", label='$x^* = [ \\frac{1}{\\sqrt{2}}, \\frac{-1}{\\sqrt{2}}]^T$',markersize= 5 )
 
 
-pairs = [(d1, d2) for d2 in np.linspace(miny-np.abs(xoptimal[1]), maxy,100)
-                for d1 in np.linspace( minx , maxx+np.abs(xoptimal[0]), 100)
-                if  d1>=0 and d2<=0]
+pairs = [(d1, d2) for d2 in np.linspace(miny-np.abs(xoptimal[1]), maxy,500)
+                for d1 in np.linspace( minx , maxx+np.abs(xoptimal[0]), 500)
+                if  d1>= d2-0.01 and d1<= d2+0.01 ]
 ss, ts = np.hsplit(np.array(pairs), 2)
 # plot the results
-plt.scatter(ss+xoptimal[0], ts+xoptimal[1], color='black', cmap='jet', label='$\\nabla C_1(x^*)^T D = 0 $', zorder=3, alpha=0.1, edgecolors='none' )
+plt.scatter(ss+xoptimal[0], ts+xoptimal[1], color='black', cmap='jet', label='$Direcciones \quad linealizadas $', zorder=3, alpha=0.1, edgecolors='none' )
 
 
 
@@ -98,7 +98,7 @@ kw1 = dict(arrowstyle=style, color="b", label='$\\nabla C_1(x^*)$')
 kw3 = dict(arrowstyle=style, color="r", label='$\\nabla f(x^*)$')
 kw4 = dict(arrowstyle=style, color="g", label='$\\lambda^* \quad Lagrangiano$')
 
-a1 = patches.FancyArrowPatch((xoptimal[0], xoptimal[1]), (xoptimal[0]+c1optimal[0], xoptimal[1]+c1optimal[1]),**kw1 )
+a1 = patches.FancyArrowPatch((xoptimal[0], xoptimal[1]), (xoptimal[0]+ gradientc1[0], xoptimal[1]+gradientc1[1]),**kw1 )
 
 a3 = patches.FancyArrowPatch((xoptimal[0], xoptimal[1]), (xoptimal[0]+ gradientf[0], xoptimal[1]+gradientf[1]) ,**kw3 )
 
