@@ -1,0 +1,80 @@
+<html><head>
+<title>simplex.py</title>
+<meta name="Generator" content="htmlizer/[twisted, version 13.2.0]" />
+<link rel="alternate" href="simplex.py" type="text/x-python" />
+
+</head>
+<body>
+<pre><span class="py-src-comment">## mwtodos de utilidad...</span>
+<span class="py-src-comment">###from numpy import matrix</span>
+<span class="py-src-comment">###A = matrix( [[1,2,3],[11,12,13],[21,22,23]]) # Creates a matrix.</span>
+<span class="py-src-comment">###x = matrix( [[1],[2],[3]] )                  # Creates a matrix (like a column vector).</span>
+<span class="py-src-comment">###y = matrix( [[1,2,3]] )                      # Creates a matrix (like a row vector).</span>
+<span class="py-src-comment">###print A.T                                    # Transpose of A.</span>
+<span class="py-src-comment">###print A*x                                    # Matrix multiplication of A and x.</span>
+<span class="py-src-comment">###print A.I                                    # Inverse of A.</span>
+<span class="py-src-comment">###print linalg.solve(A, x)     # Solve the linear equation system.</span>
+<span class="py-src-keyword">from</span> <span class="py-src-variable">numpy</span> <span class="py-src-keyword">import</span> <span class="py-src-variable">linalg</span>
+<span class="py-src-keyword">from</span> <span class="py-src-variable">numpy</span> <span class="py-src-keyword">import</span> <span class="py-src-variable">matrix</span>
+<span class="py-src-keyword">from</span> <span class="py-src-variable">numpy</span>.<span class="py-src-variable">linalg</span> <span class="py-src-keyword">import</span> <span class="py-src-variable">inv</span>
+<span class="py-src-keyword">import</span> <span class="py-src-variable">numpy</span> <span class="py-src-keyword">as</span> <span class="py-src-variable">np</span>
+<span class="py-src-keyword">import</span> <span class="py-src-variable">numpy</span>.<span class="py-src-variable">matlib</span>
+<span class="py-src-comment">###Standar matrix A </span>
+<span class="py-src-variable">A</span> = <span class="py-src-variable">matrix</span>([[<span class="py-src-number">1</span>, <span class="py-src-number">1</span>, <span class="py-src-number">1</span>, <span class="py-src-number">0</span>], [<span class="py-src-number">2</span>, <span class="py-src-number">0.5</span>, <span class="py-src-number">0</span>, <span class="py-src-number">1</span>]])
+<span class="py-src-variable">b</span> = <span class="py-src-variable">matrix</span>([[<span class="py-src-number">8</span>], [<span class="py-src-number">8</span>]])
+<span class="py-src-variable">C</span> = <span class="py-src-variable">matrix</span>([-<span class="py-src-number">3</span>, -<span class="py-src-number">2</span>, <span class="py-src-number">0</span>, <span class="py-src-number">0</span>])
+
+<span class="py-src-comment">#iB = [2, 3]</span>
+<span class="py-src-comment">#iN = [0, 1]</span>
+<span class="py-src-comment">#SN = matrix([ [-1, -1]])</span>
+<span class="py-src-comment">#XN = np.matlib.zeros(2).T</span>
+
+
+<span class="py-src-variable">A</span> = <span class="py-src-variable">matrix</span>([[<span class="py-src-number">4</span>, <span class="py-src-number">5</span>, <span class="py-src-number">3</span>, <span class="py-src-number">1</span>, <span class="py-src-number">0</span>, <span class="py-src-number">0</span>], [<span class="py-src-number">3</span>, <span class="py-src-number">4</span>, <span class="py-src-number">2</span>, <span class="py-src-number">0</span>, <span class="py-src-number">1</span>, <span class="py-src-number">0</span>], [<span class="py-src-number">4</span>, <span class="py-src-number">2</span>, <span class="py-src-number">1</span>, <span class="py-src-number">0</span>, <span class="py-src-number">0</span>, <span class="py-src-number">1</span>]])
+<span class="py-src-variable">b</span> = <span class="py-src-variable">matrix</span>([[<span class="py-src-number">12</span>], [<span class="py-src-number">10</span>], [<span class="py-src-number">8</span>]])
+<span class="py-src-variable">C</span> = <span class="py-src-variable">matrix</span>([<span class="py-src-number">6</span>, <span class="py-src-number">4</span>, <span class="py-src-number">3</span>, <span class="py-src-number">0</span>, <span class="py-src-number">0</span>, <span class="py-src-number">0</span>])
+<span class="py-src-variable">iB</span> = [<span class="py-src-number">3</span>, <span class="py-src-number">4</span>, <span class="py-src-number">5</span>]
+<span class="py-src-variable">iN</span> = [<span class="py-src-number">0</span>, <span class="py-src-number">1</span>, <span class="py-src-number">2</span>]
+<span class="py-src-variable">SN</span> = <span class="py-src-variable">matrix</span>([ [-<span class="py-src-number">1</span>, -<span class="py-src-number">1</span>, -<span class="py-src-number">1</span>]])
+<span class="py-src-variable">XN</span> = <span class="py-src-variable">np</span>.<span class="py-src-variable">matlib</span>.<span class="py-src-variable">zeros</span>(<span class="py-src-number">3</span>).<span class="py-src-variable">T</span>
+
+<span class="py-src-variable">B</span> = <span class="py-src-variable">A</span>[:,<span class="py-src-variable">iB</span>]
+<span class="py-src-variable">N</span> = <span class="py-src-variable">A</span>[:, <span class="py-src-variable">iN</span>]
+<span class="py-src-variable">CN</span> = <span class="py-src-variable">C</span>[:, <span class="py-src-variable">iN</span>].<span class="py-src-variable">T</span>
+<span class="py-src-variable">CB</span> = <span class="py-src-variable">C</span>[:, <span class="py-src-variable">iB</span>].<span class="py-src-variable">T</span>
+<span class="py-src-variable">Binv</span> = <span class="py-src-variable">B</span>.<span class="py-src-variable">I</span>
+<span class="py-src-variable">XB</span> = <span class="py-src-variable">Binv</span>*<span class="py-src-variable">b</span>
+<span class="py-src-keyword">while</span> <span class="py-src-number">1</span> :
+   <span class="py-src-variable">lam</span>= <span class="py-src-variable">linalg</span>.<span class="py-src-variable">solve</span>(<span class="py-src-variable">B</span>.<span class="py-src-variable">T</span>, <span class="py-src-variable">CB</span>)
+   <span class="py-src-variable">SN</span> = <span class="py-src-variable">CN</span> - <span class="py-src-variable">N</span>.<span class="py-src-variable">T</span>*<span class="py-src-variable">lam</span>
+   <span class="py-src-keyword">if</span> (<span class="py-src-variable">SN</span>&gt;<span class="py-src-number">0</span>).<span class="py-src-variable">all</span>():
+      <span class="py-src-keyword">print</span>(<span class="py-src-string">"Optimal point found..."</span>)
+      <span class="py-src-keyword">print</span> <span class="py-src-variable">lam</span>
+      <span class="py-src-keyword">print</span>(<span class="py-src-variable">XB</span>)
+      <span class="py-src-keyword">print</span>(<span class="py-src-variable">iB</span>)
+      <span class="py-src-variable">exit</span>(<span class="py-src-number">0</span>) 
+   <span class="py-src-variable">q_r</span>, <span class="py-src-variable">q_c</span> = <span class="py-src-variable">np</span>.<span class="py-src-variable">where</span>(<span class="py-src-variable">SN</span>&lt;<span class="py-src-number">0</span>)
+   <span class="py-src-variable">q</span> = <span class="py-src-variable">q_r</span>[<span class="py-src-number">0</span>,<span class="py-src-number">0</span>] <span class="py-src-comment">## get the first negative row component</span>
+   <span class="py-src-variable">t</span>= <span class="py-src-variable">linalg</span>.<span class="py-src-variable">solve</span>(<span class="py-src-variable">B</span>, <span class="py-src-variable">A</span>[:,<span class="py-src-variable">iN</span>[<span class="py-src-variable">q</span>]])
+   <span class="py-src-keyword">if</span> (<span class="py-src-variable">t</span> &lt;= <span class="py-src-number">0</span>).<span class="py-src-variable">all</span>():
+      <span class="py-src-keyword">print</span>(<span class="py-src-string">"Problem is unbounded..."</span>)
+   <span class="py-src-variable">t2</span> = <span class="py-src-variable">t</span>
+   <span class="py-src-variable">t2</span>[<span class="py-src-variable">t2</span>&lt;<span class="py-src-number">0</span>] = <span class="py-src-variable">np</span>.<span class="py-src-variable">nan</span>
+   <span class="py-src-comment">#Update XB+</span>
+   <span class="py-src-variable">p</span> = <span class="py-src-variable">np</span>.<span class="py-src-variable">nanargmin</span>(<span class="py-src-variable">XB</span>/<span class="py-src-variable">t2</span>)
+   <span class="py-src-variable">Xq</span> = <span class="py-src-variable">XB</span>[<span class="py-src-variable">p</span>]/<span class="py-src-variable">t2</span>[<span class="py-src-variable">p</span>]
+   <span class="py-src-variable">XB</span> = <span class="py-src-variable">XB</span> - <span class="py-src-variable">t</span>*<span class="py-src-variable">Xq</span>
+   <span class="py-src-variable">XB</span>[<span class="py-src-variable">p</span>] = <span class="py-src-variable">Xq</span>
+    
+   <span class="py-src-variable">tmp_out</span> = <span class="py-src-variable">iB</span>[<span class="py-src-variable">p</span>] 
+   <span class="py-src-variable">iB</span>[<span class="py-src-variable">p</span>] = <span class="py-src-variable">iN</span>[<span class="py-src-variable">q</span>]
+   <span class="py-src-variable">iN</span>[<span class="py-src-variable">q</span>] = <span class="py-src-variable">tmp_out</span>
+
+   <span class="py-src-variable">B</span> = <span class="py-src-variable">A</span>[:,<span class="py-src-variable">iB</span>]
+   <span class="py-src-variable">N</span> = <span class="py-src-variable">A</span>[:, <span class="py-src-variable">iN</span>]
+   <span class="py-src-variable">CN</span> = <span class="py-src-variable">C</span>[:, <span class="py-src-variable">iN</span>].<span class="py-src-variable">T</span>
+   <span class="py-src-variable">CB</span> = <span class="py-src-variable">C</span>[:, <span class="py-src-variable">iB</span>].<span class="py-src-variable">T</span>
+<span class="py-src-comment">##Change B by adding q and removing p...</span>
+
+</pre>
+</body>

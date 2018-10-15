@@ -1,0 +1,10 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [2][-]{subsection.1.1}{Condiciones de optimalidad}{section.1}% 2
+\BOOKMARK [1][-]{section.2}{M\351todo/Algoritmo}{}% 3
+\BOOKMARK [2][-]{subsection.2.1}{Conversi\363n de la forma Primal a la Dual}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.2}{Implementaci\363n del Algoritmo Simplex}{section.2}% 5
+\BOOKMARK [2][-]{subsection.2.3}{An\341lisis de rendimiento del m\351todo simples}{section.2}% 6
+\BOOKMARK [2][-]{subsection.2.4}{Problema de asignaci\363n de ambulancias a\351reas}{section.2}% 7
+\BOOKMARK [3][-]{subsubsection.2.4.1}{Declaraci\363n del problema}{subsection.2.4}% 8
+\BOOKMARK [2][-]{subsection.2.5}{Formulaci\363n matem\341tica}{section.2}% 9
+\BOOKMARK [1][-]{section*.6}{References}{}% 10

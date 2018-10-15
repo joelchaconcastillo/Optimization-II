@@ -37,10 +37,10 @@ Z1 = X #np.exp(-X**2 - Y**2)
 Z2 = Y #np.exp(-(X - 1)**2 - (Y - 1)**2)
 
 Z = (Z1 * Z2) 
-gradientf = [-1.0/np.sqrt(2.0), 1.0/np.sqrt(2.0)]
+gradientf = [1.0/np.sqrt(2.0), -1.0/np.sqrt(2.0)]
 xoptimal = [-1.0/np.sqrt(2.0), 1.0/np.sqrt(2.0)]
-c1optimal = [2.0/np.sqrt(2.0), -2.0/np.sqrt(2.0)]
-lambda1 = [1.0/2, -1.0/2]
+c1optimal = [-2.0/np.sqrt(2.0), 2.0/np.sqrt(2.0)]
+lambda1 = [-1.0/2]
 ###############################################################################
 # Create a simple contour plot with labels using default colors.  The
 # inline argument to clabel will control whether the labels are draw
@@ -83,10 +83,10 @@ plt.plot( xoptimal[0], xoptimal[1], marker='o', color="red", label='$x^* = [ \\f
 
 pairs = [(d1, d2) for d2 in np.linspace(miny-np.abs(xoptimal[1]), maxy,100)
                 for d1 in np.linspace( minx , maxx+np.abs(xoptimal[0]), 100)
-                if  d1>=0 and d2<=0]
+                if  abs(d1 - d2) < 0.01 ]
 ss, ts = np.hsplit(np.array(pairs), 2)
 # plot the results
-plt.scatter(ss+xoptimal[0], ts+xoptimal[1], color='black', cmap='jet', label='$\\nabla C_1(x^*)^T D = 0 $', zorder=3, alpha=0.1, edgecolors='none' )
+plt.scatter(ss+xoptimal[0], ts+xoptimal[1], color='black', cmap='jet', label='$\\nabla C_1(x^*)^T D = 0 $', zorder=3, alpha=0.7, edgecolors='none' )
 
 
 
@@ -96,15 +96,15 @@ plt.scatter(ss+xoptimal[0], ts+xoptimal[1], color='black', cmap='jet', label='$\
 style="Simple,tail_width=1.9,head_width=4,head_length=8"
 kw1 = dict(arrowstyle=style, color="b", label='$\\nabla C_1(x^*)$')
 kw3 = dict(arrowstyle=style, color="r", label='$\\nabla f(x^*)$')
-kw4 = dict(arrowstyle=style, color="g", label='$\\lambda^* \quad Lagrangiano$')
+#kw4 = dict(arrowstyle=style, color="g", label='$\\lambda^* \quad Lagrangiano$')
 
 a1 = patches.FancyArrowPatch((xoptimal[0], xoptimal[1]), (xoptimal[0]+c1optimal[0], xoptimal[1]+c1optimal[1]),**kw1 )
 
 a3 = patches.FancyArrowPatch((xoptimal[0], xoptimal[1]), (xoptimal[0]+ gradientf[0], xoptimal[1]+gradientf[1]) ,**kw3 )
 
-a4 = patches.FancyArrowPatch((xoptimal[0], xoptimal[1]), (xoptimal[0]+ lambda1[0], xoptimal[1]+lambda1[1]) ,**kw4 )
+#a4 = patches.FancyArrowPatch((xoptimal[0], xoptimal[1]), (xoptimal[0]+ lambda1[0], xoptimal[1]+lambda1[1]) ,**kw4 )
 
-for a in [a1,a3, a4]:
+for a in [a1,a3]:
     plt.gca().add_patch(a)
 
 plt.xlabel('$x_1$', fontsize=16)

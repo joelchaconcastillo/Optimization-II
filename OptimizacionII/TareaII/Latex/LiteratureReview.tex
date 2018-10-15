@@ -1,0 +1,327 @@
+ 
+\subsection{Unwrapping}
+
+En este trabajo se resuelve el problema de desenvolvimiento de fases ``Unwrapping'' implementando funciones de bases radiales (RBF), particularmente este proceso se implementa en base a Gaussianas.
+%
+El proceso consiste en optimizar los parámetros de la media, varianza y además el factor de peso, los cuales están presentes en la función a optimizar.
+%
+Esta función de costo esta basada en la forma de mínimos cuadrados, adicionalmente los parámetros son optimizados ensamblando un jacobiano y optimizándolo por medio del método BFGS.
+%
+
+%
+El problema de desenvolvimiento de fases consiste en obtener la función original o desenvuelta ($f$) dada otra función envuelta ($g$) por medio del operador de conversión $W(f)$. 
+
+
+%En resúmen para recuperar $f$ de $g$:\\ \\
+%\textbf{1.} Se calcula $g'_1 =g(x) - g(x- e_1)$ y $g'_2 =g(x) - g(x- e_2)$.\\
+%\textbf{2.} Hacer $\widehat{g_1'} = W\{g_1'\}$  y $\widehat{g_2'} = W\{g_2'\}$ \\
+%\textbf{3.} Integrar $\widehat{g_2'}$ y $\widehat{g_2'}$, entonces la soluci\'on es la integral.\\ \\
+%En el paso 3 en este caso se resuelve por medio del m\'etodo de  Elemento Finito, el cual consiste en discretizar el dominio, y resolverlo por medio de diferencias finitas.
+
+\subsection{Notación e igualdades}
+A continuación se muestran algunas igualdades utilizadas en este documento:
+
+$f \rightarrow$ Imágen desenvuelta\\
+$g \rightarrow$ Imágen envuelta\\
+$W\{x\}$ = Operador para aplicar wrapping\\
+$g'_1 = g(x) - g(x - e_1) \rightarrow$ Diferencia finita en filas\\
+$g'_2 = g(x) - g(x - e_2) \rightarrow$ Diferencia finita en columnas\\
+$\widehat{g_1'} = W\{g_1'\}$\\
+$\widehat{g_2'} = W\{g_2'\}$\\
+$\sigma_{i,j} \rightarrow$  Varianza en el pixel \{i,j\}\\
+$\mu_{i,j} \rightarrow$ Media en el pixel \{i,j\}
+
+\begin{equation} 
+\begin{split}
+f'(x) &=f(x) - f(x-e_i) = \sum_{ij} \alpha_{ij} \Psi(i,j,x)\\
+\Psi(i,j) & = \Phi(i,j,x)- \Phi(i,j,x-e_i) = \frac{ \partial \Phi}{ \partial x} \\
+\Phi(i,j, x)& = \exp \left [\frac{1}{2\sigma^2_{ij}}(x-\mu_{ij})\right ]
+\end{split}
+\end{equation}
+
+\subsection{Función objetivo}
+La función de costo se plantea en base al problema de mínimos cuadrados, esta implementación incluye diferencas finitas.
+%
+Particularmente en este enfoque se desea minimizar la diferencia entre el gradiente de la función desenvuelta $f$ y envuelta de la derivada de la envuelta $\widehat{g_1'}$.
+\begin{equation}
+\begin{split}
+ U_{min}(f) &= \\
+& \frac{1}{2} \sum_{x,x-e_1}[ \widehat{g_1'}-f_1']^2  + \frac{1}{2}  \sum_{x,x-e_2}[ \widehat{g_2'}-f_2']^2  \\ 
+& = \frac{1}{2} \sum_{x,x-e_1}[ \widehat{g_1'}-(f(x)- f(x-e_1))]^2 \\  +
+& \frac{1}{2}  \sum_{x,x-e_2}[ \widehat{g_2'}-(f(x)- f(x-e_2))]^2
+\end{split}
+\end{equation}
+Si $f$ satisface Naquist entonces se utiliza la propiedad de Itoh la cual indica que:
+\begin{equation}
+\begin{split}
+f(a) - f(b) = W\{ g(a) - g(b) \}+n\\
+f' = W\{g'\} + n
+\end{split}
+\end{equation}
+El primer término está enfocado en diferencia finitas y el segundo término en el análisis teórico. 
+%
+Además $n$ es un residual probable, $a$ y $b$ son los pixeles vecinos.
+
+
+\subsection{M\'inimos cuadrados no lineales}
+Se utiliza el método de mínimos cuadrados no lineales para ensamblar un conjunto de $m$ observaciones con un modelo que es no lineal en $n$ par\'ametros desconocidos ($m > n$). 
+%
+El principio de este método consiste en aproximar el modelo por una forma lineal e iteraticamente refinar los par\'ametros.
+
+
+El modelo para mínimos cuadrados no lineales consiste en $min_x f(x) = \frac{1}{2} ||Ax - b||^2$ donde $\nabla f(x) = A^T (Ax - b)$ entonces $A^T Ax - A^T b = 0$ despejando el $x$ se tiene que $x = (A^T b)(A^T A)^{-1}$. \\
+En el caso no lineal se busca encontrar un vector de residuos de la forma $R(x)$ a partir de la función objetivo a optimizar
+$f(x) = \frac{1}{2} ||R(x)||_2 = \frac{1}{2} R(x)^T R(x)$
+donde 
+\begin{align*}
+R(x) = \begin{bmatrix}
+       R_1(x)  \\
+       R_2(x) \\
+       R_3(x) \\ 
+     \end{bmatrix}
+\end{align*}
+Donde $R(x)$ es una función vectorial
+$R: \Re ^n -> \Re ^m $
+entonces el Jacobiano del vector de residuales es
+\begin{align*}
+\nabla R(x)  = \begin{bmatrix}
+       \frac{R_1}{\partial x_1} & \frac{R_1}{\partial x_2} & .... & \frac{R_1}{\partial x_n} \\
+       \frac{R_2}{\partial x_1} & \frac{R_2}{\partial x_2} & .... & \frac{R_2}{\partial x_n} \\       
+       \frac{R_3}{\partial x_1} & \frac{R_3}{\partial x_2} & .... & \frac{R_3}{\partial x_n} \\
+        \frac{R_m}{\partial x_1} & \frac{R_m}{\partial x_2} & .... & \frac{R_m}{\partial x_n} \\
+     \end{bmatrix} =
+     \begin{bmatrix}
+	\nabla R_1^T\\    
+	\nabla R_2^T\\    
+	\nabla R_3^T\\    
+	\nabla R_n^T\\    
+     \end{bmatrix} 
+\end{align*}
+Así el gradiente de la función objetivo se pude calcular por medio del vector de residuales
+\begin{align*}
+\begin{split}
+& \nabla f(x) =  \\ &R(x)^T \nabla R(x) =  \\
+    & \begin{bmatrix}
+   	    R_1, R_2, R_3,..., R_m 
+     \end{bmatrix} 
+     \begin{bmatrix}
+   		\nabla R_1^T  \\ \nabla R_2^T & \\ \nabla R_3^T & \\ ...\\ \nabla R_m^T 
+      	\end{bmatrix} = \\& R_1 \nabla R_1 + R_2 \nabla R_2 + ... + R_m \nabla R_m =
+      	\\ & \sum_{j=1}^m R_j(x) \nabla R_j(x)
+\end{split}
+\end{align*}
+
+
+
+
+
+\subsection{Gradiente de la función objetivo}
+Dado que el método BFGS es un método iterativo, y existe una dependencia entre los parámetros \{ $\lambda$, $\mu$, $\sigma$ \} es necesario ensamblar en cada iteración una matriz del Jacobiano algo muy similar a lo que se implementa en el método de elementos finitos, pero en este caso en lugar de ensamblar elementos se utilizan matrices que corresponden al Jacobiano, entonces sólo se implementa una vez por iteración el método BFGS.
+\begin{equation} \label{JACOBIANO}
+\begin{split}
+J = \begin{bmatrix}
+	   	J_{\alpha} &    
+		J_{\mu} &
+		J_{\sigma}      
+           \end{bmatrix}
+\end{split}
+\end{equation}
+
+donde
+
+$J_{\alpha}$ = Jacobiano que corresponde al vector de pesos.\\
+$J_{\mu}$ = Jacobiano que corresponde al vector de medias.\\
+$J_{\sigma}$ = Jacobiano que corresponde al vector de varianzas.
+
+
+\subsubsection{Minimizaci\'on de los pesos}
+Para efectuar la optimizaci\'on del par\'ametro de alfa, se deriva la funci\'on con respecto a los pesos $\alpha$ y se iguala a cero,  lo cual resulta como:
+\begin{equation}
+\begin{split}
+min_\alpha f(U)=&
+ \left [  - \sum_{i,j} \Psi_1(i,j, x)\right]\Psi_1(i,j, x) \\ & \left [ - \sum_{i,j} \Psi_2(i,j, x) \right ] \Psi_2(i,j, x)	
+\end{split} 	
+\end{equation}
+\subsubsection{Vector de residual}
+En el caso de los pesos dado que se busca representar un vector $R(x)$ de la funci\'on objetivo de la forma $\frac{1}{2}||R(x)||^2$ entonces se realiza la separaci\'on de la funci\'on objetivo de sus dos t\'erminos en un vector de residuales.
+ \begin{align}
+ \begin{split} \label{Vector_Residuales}
+ R_1(x) = \widehat{g_1'}-(f(x)- f(x-e_1))\\
+ R_2(x) = \widehat{g_2'}-(f(x)- f(x-e_2))\\ 
+ \end{split}
+ \end{align}
+\subsubsection{Jacobiano de pesos $\alpha$}
+Para generar el jacobiano de los residuales en relaci\'on a los pesos $\alpha$ de la funci\'on objetivo, se construye una matriz donde las columnas representan el peso de cada gaussiana, y las filas estan conformadas por las derivadas de los vectores residuales $R_1$ y $R_2$ con respecto a $\alpha$ dado que en este caso se optimiza con respecto a $\alpha$, se tiene la forma del jacobiano compuesto por:
+\begin{align*}
+\begin{split}
+J_{\alpha} = \begin{bmatrix}
+	   	R'_1(x) \\    
+		R'_2(x)      
+           \end{bmatrix}
+\end{split}
+\end{align*}
+Donde la dimensión del jacobiano es de $2XNXM$ filas y $K$ Gaussianas, $NxM$ es el número de pixeles de la imágen, y $K$ es el número de Gaussianas del modelo. 
+\subsubsection{Optimizaci\'on de la media}
+En la optimización de las medias primeramente se obtiene el vector de residuales $R(x)$ y posteriormente se aplican las derivadas respecto a las medias $\mu$, en esta implementación se utilizan diferencias finitas para obtener el valor correspondiente de $ \frac{\partial \Phi}{\partial x}$, dado que en este caso el problema a optimizar consiste en optimizar un vector de parámetros $\mu = [x, y]$ es necesario calcular la matriz del Jacobiano y utilizando el m\'etodo de m\'inimos cuadrados no lineales en base a los vectores residuales.
+Se presenta el c\'alculo del jacobiano con respecto a los cuatro cuadrantes
+\begin{align*}
+\begin{split}
+J(\mu) = \begin{bmatrix}
+	   	\frac{\partial \Phi, g_1 }{ \partial \mu_i } & || & \frac{\partial \Phi, g_1 }{ \partial \mu_j } \\    
+		\frac{\partial \Phi, g_2 }{ \partial \mu_i } & || & \frac{\partial \Phi, g_2 }{ \partial \mu_i }    
+           \end{bmatrix}
+\end{split}
+\end{align*}
+\subsubsection{Minimizaci\'on de la varianza}
+En la optimización de las varianzas se realiza de forma similar al vector de residuales (\ref{Vector_Residuales}), donde el Jacobiano tiene una estructura similar al de los pesos.\\
+La estructura del Jacobiano está definida como una matriz 
+\begin{align*}
+\begin{split}
+J(\sigma) = \begin{bmatrix}
+	   	R'_1(x) \\    
+		R'_2(x)      
+           \end{bmatrix}
+\end{split}
+\end{align*}
+\subsection{BFGS}
+El algoritmo de BFGS fué desarrollado por Broyden, Fletches, Goldfarb y Shanno. Este método realiza la estimación de la inversa del hessiano $B_t$ que corresponde a la función objetivo.
+La actualización que se emplea minimiza la función de peso con la norma de Frobenius $|| B_{t+1} - B_t ||_W$ sujeto a la ecuación secante $s_t = B_{t+1}y_t$, donde $s_t$ y $y_t$ denotan el paso más reciente a lo largo de la trayectoria de la optimización en el o los parámetros y el espacio del gradiente espectivamente.
+ Entonces $B_t$ es utilizado para efectuar un paso de "quasi-Newton" con $\eta_t$ normalmente determinado por una búsqueda lineal, donde las condiciones de Wolfe aseguran la convergencia.\\
+ BGFS requiere $O(n^2)$ de complejidad en el espacio y tiempo por iteración.  
+
+\begin{algorithm}   
+	\caption{Standard BFGS Method}  
+	\label{alg1}
+	\begin{algorithmic} 
+		\REQUIRE $\nabla f$, vector de parámetros a optimizar $\theta$, búsqueda lineal con las ocndiciones de Wolfe.
+		\STATE t = 0 
+		\STATE $B_0 = I$
+		\WHILE{ $|| p_t|| > \epsilon$ }
+			\STATE $p_t = -B_t \nabla f(\theta_t)$
+			\STATE $\eta_t = linemin(f,\theta_t, p_t)$
+			\STATE $s_t = \eta_t p_t$
+			\STATE $\theta_{t+1}= \theta_t + s_t$
+			\STATE $y_t = \nabla f(\theta_{t+1} - \nabla f(\theta_t)$
+			\STATE if $t=0$ : $B_t = \frac{s_r^T y_t}{y_t^T y_t} I$
+			\STATE $\rho_t = (s_t^T y_t)^{-1}$
+			\STATE $B_{t+1} = (I- \rho_t s_t y_t)^T B_t ( I - \rho_t y_t s_t^T)+\rho_r S_t S_t^T$
+		\ENDWHILE
+	\RETURN $\theta_t$
+	\end{algorithmic}
+\end{algorithm}
+\subsection{Online BFGS}
+Este algoritmo es una modificaci\'on del m\'etodo BFGS, los cambios aplicados funcionan de forma eficiente con aproximaciones estoc\'asticas, las modificaciones no implementan una b\'usqueda lineal,% la actualizaci\'on de $B_t$ y se toman mediciones consistentes del gradiente.
+esto en base a que en casos complejos se consideran inestables, quizás un razón de esto es que criterio de validación (en este caso condición de Wolfe), no puede ser estimado por medio de muestras relativas al problema.
+%
+Por otra parte, el BFGS online no requiere una búsqueda lineal exacta para actualizar correctamente la estimación de la curvatura, por lo tanto puede ser reemplazada.
+\begin{equation}
+	\eta_t = \frac{ \tau }{ \tau +t } \eta _0
+\end{equation}
+Sin la búsqueda lineal se necesita asegurar explícitamente que el primer parámetro $B_0$ se encuentra apropiadamente escalado, esto se realiza multiplicando $B_0$ con un pequeño valor $\epsilon > 0$. Normalmente se asiga  $\epsilon = 10^{-10}$.
+\begin{algorithm}   
+	\caption{Online BFGS Method}  
+	\label{alg1}
+	\begin{algorithmic} 
+		\REQUIRE $\nabla f$, vector de parámetros a optimizar $\theta$, búsqueda lineal con las ocndiciones de Wolfe.
+		\STATE t = 0 
+		\STATE $B_0 = \epsilon I$
+		\WHILE{ $|| p_t || > \epsilon$ }
+			\STATE $p_t = -B_t \nabla f(\theta_t)$
+			\STATE $s_t = \frac{\eta_t}{c} p_t$
+			\STATE $\theta_{t+1}= \theta_t + s_t$
+			\STATE $y_t = \nabla f(\theta_{t+1} - \nabla f(\theta_t) + \lambda s_t$ 
+			\STATE if $t=0$ : $B_t = \frac{s_r^T y_t}{y_t^T y_t} I$
+			\STATE $\rho_t = (s_t^T y_t)^{-1}$
+			\STATE $B_{t+1} = (I- \rho_t s_t y_t)^T B_t ( I - \rho_t y_t s_t^T)+\rho_r S_t S_t^T + c \rho_r s_t s_t^T$
+		\ENDWHILE
+	\RETURN $\theta_t$
+	\end{algorithmic}
+\end{algorithm}
+\section{Resultados}
+Se programaron y se implementaron los algoritmos BFGS, OBFGS y Levenberg-Maquardt, el algoritmo de Gauss Newton no se considera en este conjunto debido a su inestabilidad y además de que no se elaboró junto a la optimización de la varianza (los demás si tienen optimizada la varianza), se utilizaron tres imágenes de entrenamiento, TestAN.pgm, TestDN.pgm y wrappingN.pgm, todas las imágenes envueltas tienen ruido impuesto lo cual puede afectar al implementar el algoritmo.\\
+%
+
+Es complicado establecer el mismo criterio de paro en cada algoritmo, por lo tanto se dificulta seleccionar a un método que sea superior al resto, por  ejemplo el hecho de ensamblar un Jacobiano completo (\ref{JACOBIANO}) en el caso de los algoritmo BFGS o Online BFGS difieren del método Levene-Maquardt, ya que se consideran los vectores de dirección $p_k$  en forma distinta, en el caso de Levene-Maquart se utiliza la norma de los vectores $ || p_{k \alpha} || + || p_{k \mu} || + || p_{k \sigma} || $ como el criterio de paro, por otra parte en los BFGS es $ || p_{k}  || $ donde el vector $p_k$ es la representación o esta ensamblado por $\alpha$, $\mu$ y $\sigma$.\\
+%
+Cada algoritmo es m\`as eficiente en diferentes situaciones, para ilustrar esto se presenta la tabla que corresponde a la figura (\ref{Comparativa}), donde se observa que en general el m\`etodo OBFGS es mejor que el m\`etodo BFGS, la primer columna, un mayor número de estrellas significa que es un algoritmo más rápido.
+%
+En la segunda columna se cualifica la estabilidad del algoritmo, es decir que su funcionamiento es más estable en imágenes con mayor ruido.
+%
+La tercer columna significa el número de iteraciones necesarias para converger, con un número elevado de estrellas el algoritmo necesita un menor número de iteraciones en comparación a los demás.
+%
+Además, se considera un algoritmos estocástico derivado del método Levenberg-Maquardt, este es estocástico por lo que trabaja con  muestras de las imágenes y se puede considerar más estable que el algoritmo normal.
+%
+El algoritmo BFGS tiene un rendimiento deficiente en comparación a demás métodos, posiblemente esto es por la b\`usqueda lineal que se implementa, ya que en esta aplicaci\`on el gradiente de la funci\`on objetivo puede oscilar y por lo tanto las condiciones de Wolfe tienden a fallar, en su lugar se propuso un valor de incremento de 0.1, los dem\`as m\`etodos no manejan una b\`usqueda lineal, por ejemplo Levenberg Maquardt utiliza regiones de confianza modificando la diagonal de la matriz Jacobiana.  
+%
+En contraparte a los m\`etodos estoc\`asticos OBFGS y Levenberg-Maquardt necesitan un n\`umero mayor de iteraciones, pero dado que utilizan una muestra en tiempo y estabilidad son mejores.
+\begin{figure}[H]\label{Resultados} 
+	\centering
+	\includegraphics[width=0.50\textwidth]{img/Resultado1.png}
+	\includegraphics[width=0.50\textwidth]{img/Resultado2.png}
+		\caption{Resultado de desenvolver las imágenes de prueba.}
+\end{figure}
+\begin{figure}[H] \label{Comparativa}
+	\centering
+	\includegraphics[width=0.50\textwidth]{img/Comparativa.png}
+	\caption{Categorización de los métodos en base al criterio de ejecutar varias pruebas, una estrella indica el m\`inimo y cindo estrellas el m\`aximo.}
+\end{figure}
+
+Se puede observar en la figura (\ref{FaseImg}) la diferencia visual entre los distintos m\`etodos, el n\`umero de Gaussianas que se utilizaron fueron 5x5, la imágen (\ref{EnvueltaImg}) envuelta , el n\`umero de pixeles de la im\`agen es de 256x256 
+\begin{figure}[H]\label{EnvueltaImg} 
+	\centering
+	\includegraphics[width=0.20\textwidth]{img/wrappingN.png}
+		\caption{Im\`agen fase envuelta.}
+\end{figure}
+
+\begin{figure}[H]\label{FaseImg}
+	\centering
+	\includegraphics[width=0.20\textwidth]{img/phase.png}
+	\includegraphics[width=0.20\textwidth]{img/MultimodalMaquardtNormal.png}
+	\includegraphics[width=0.20\textwidth]{img/MultimodalOBFGSP_80.png}
+\includegraphics[width=0.20\textwidth]{img/MultimodalMaquardt.png}	
+		\caption{La im\`agen superior izquierda es la im\`agen original fase, la im\`agen superior derecha corresponde al Levenbeg-Maquardt estoc\`astico, en la parte inferior izquierda corresponde al algoritmo Online BFGS con muestras de un 80\% y en la parte ingerior derecha corresponde a Levenbeg-Maquardt.}
+\end{figure}
+\begin{figure}[H]\label{EnvueltaImg} 
+	\centering
+	\includegraphics[width=0.20\textwidth]{img/MultimodalOBFGSP_80_G6x6.png}
+	\includegraphics[width=0.20\textwidth]{img/MultimodalOBFGSP_50_G6x6.png}
+		\caption{La im\`agen izquierda corresponde al m\`etodo OBFGS con una muestra del 80\% de la im\`agen envuelta y la im\`agen de la derecha corresponde al m\`etodo OBFGS con una muestra del 50\%, el número de Gaussianas utilizadas fueron 6x6.}
+\end{figure}
+\begin{figure}[H]\label{EnvueltaImgG8} 
+	\centering
+	\includegraphics[width=0.20\textwidth]{img/MultimodalOBFGSP_80.png}
+	\includegraphics[width=0.20\textwidth]{img/MultimodalOBFGSP_50.png}
+	\includegraphics[width=0.20\textwidth]{img/MultimodalOBFGSP_30.png}
+		\caption{La im\`agen superior izquierda corresponde al m\`etodo OBFGS con una muestra del 80\% de la im\`agen envuelta con un tiempo de 7 min. y 40 seg. y la im\`agen superior derecha de la derecha corresponde al m\`etodo OBFGS con una muestra del 50\% con un tiempo de 7 min, y la imágen inferior se generó con una muestra de 30\% con un tiempo de 7 min. 41 seg., el número de Gaussianas utilizadas fueron 8x8, todas las pruebas se efectuaron con una tolerancia de 1.}
+\end{figure}
+\section{Conclusions}
+Los m\`etodos que se presentaron en este documento son considerados como m\`etodos de Quasi-Newton, se puede concluir que existen distintos m\`etodos los cuales son m\`as eficientes en distintas situaciones, por ejemplo el m\`etodo de Levenberg-Maquardt estoc\`astico es m\`as eficiente en cuanto a iteraciones que el m\`etodo de OBFGS, pero el m\`etodo OBFGS es más estable y dependiendo de la funci\`on objetivo puede converger en menor tiempo. \\
+%
+En general se puede decir que uno de los mejores m\`etodos que se presentaron en este documento es el OBFGS.\\
+%
+Una observaci\`on interesante es que los m\`etodos modificados ofrecen un mejor rendimiento que el resto de métodos.
+
+
+%\appendix
+%\section{Detalles de la implementaci´on}
+%El programa se encuentra dividido en los siguientes archivos .h y .c:
+%{\scriptsize \begin{description}
+%		\item[Funciones]\hfill \\
+%		Contiene el código que corresponde a las funciones que comparten los dos métodos.
+%		\item[GaussNewton]\hfill \\
+%		Es el algoritmo el cual se muestra presenta anteriormente y tiene sus correspondientes archivos en el directorio algorithms, los m\`etodos BFGS, OBFGS se encuentran en el archivo GaussNewton.cpp. 
+%		\item[LevenbergMaquardt]\hfill \\
+%		Es el algoritmo el cual se muestra presenta anteriormente y tiene sus correspondientes archvios en el directorio algorithms.		
+%	\end{description}
+%}
+%
+%Para ejecutar el programa se deben proveer los siguientes argumentos:
+%{\scriptsize \begin{description}
+%		\item[Imagen de entrada] \hfill \\ Es la imágen que se va a procesar con formato PGM
+%		\item[LM] \hfill \\ Es el método de Levenberg Maquardt
+%		\item[GN] \hfill \\ Es el método de Gauss-Newton.
+%     	\item[GNB] \hfill \\ Es el método de Gauss-Newton BFGS.
+%		\item[OGNB] \hfill \\ Es el método de Gauss-Newton Online BFGS.		
+%			\end{description}
+%}
+%

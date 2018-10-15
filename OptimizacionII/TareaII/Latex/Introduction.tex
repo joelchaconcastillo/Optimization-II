@@ -1,0 +1,31 @@
+\IEEEPARstart{P}{rogramación} lineal tiene un número de funciones objetivo y restricciones lineales, las cuales pueden estar conformadas tanto por igualdades como desigualdades.
+%
+El conjunto factible es un polítopo, el cual es un conjunto convexo conectado con caras poligonales planas \cite{nocedal2006sequential}. 
+%
+Los programas lineales usualmente son establecidos y analizados en la siguiente forma estándar:
+
+
+
+La forma estándar de un problema de programación lineal es:
+\begin{equation}\label{estandar}
+min \quad \vec{c}^T \vec{x}, \quad sujeto \quad a: \quad A\vec{x} = \vec{b}, \quad \vec{x} \geq 0
+\end{equation}
+
+La forma dual equivalente es representado de la forma:
+\begin{equation}\label{dual}
+max \quad \vec{b}^T \vec{\pi}, \quad sujeto \quad a: \quad A^T \vec{\pi} \leq \vec{c}
+\end{equation}
+
+\subsection{Condiciones de optimalidad}
+\begin{equation}
+\begin{split}
+\mathcal{L}(x, \pi, s) =& c^T x - \pi^T ( Ax - b) - s^T x \\
+sujeto \quad a \\
+A^T \pi + s =& c \\
+Ax =& b \\
+x \geq& 0 \\
+s \geq& 0 \\
+s_i x_i =& 0, \quad i=1,2,...,n
+\end{split}
+\end{equation}
+donde $\pi$ es el coeficiente de Lagrange.
