@@ -25,7 +25,11 @@ def graph(formula, x_range, y_range):
     plt.plot(x, y)
     plt.show()
 
+<<<<<<< HEAD
 delta = 0.0015
+=======
+delta = 0.025
+>>>>>>> 3523a5f69641cb493536383ac7768648779eff32
 minx = -2.0
 maxx = 2.0
 miny = -2.0
@@ -36,11 +40,19 @@ X, Y = np.meshgrid(x, y)
 Z1 = X #np.exp(-X**2 - Y**2)
 Z2 = Y #np.exp(-(X - 1)**2 - (Y - 1)**2)
 
+<<<<<<< HEAD
 Z = -(Z1 * Z2) 
 xoptimal = [-1.0/np.sqrt(2.0), 1.0/np.sqrt(2.0)]
 gradientf = [ -xoptimal[1], -xoptimal[0]]
 c1optimal = [-2.0/np.sqrt(2.0), 2.0/np.sqrt(2.0)]
 lambda1 = [-1.0/2.0]
+=======
+Z = (Z1 * Z2) 
+xoptimal = [-1.0/np.sqrt(2.0), -1.0/np.sqrt(2.0)]
+gradientf = [xoptimal[1], xoptimal[0]]
+gradientc1 = [-2.0/np.sqrt(2.0), -2.0/np.sqrt(2.0)]
+lambda1 = [1.0/2.0, 1.0/2.0]
+>>>>>>> 3523a5f69641cb493536383ac7768648779eff32
 ###############################################################################
 # Create a simple contour plot with labels using default colors.  The
 # inline argument to clabel will control whether the labels are draw
@@ -50,13 +62,21 @@ lambda1 = [-1.0/2.0]
 fig, ax = plt.subplots()
 CS = ax.contour(X, Y, Z)
 ax.clabel(CS, inline=100, fontsize=10)
+<<<<<<< HEAD
 ax.set_title('Optimizacion con restricciones')
+=======
+ax.set_title('Optimizacion con restricciones $min \quad x_1 x_2 \quad s.a. \quad x_1^2 + x_2^2 \leq 1$')
+>>>>>>> 3523a5f69641cb493536383ac7768648779eff32
 
 
 ###Conjunto factible
 pairs = [(d1, d2) for d2 in np.linspace(miny, maxy,200)
                 for d1 in np.linspace( minx , maxx, 200)
+<<<<<<< HEAD
                 if d1**2 + d2**2 -1 <= 0.0  ]
+=======
+                if d1**2 + d2**2  <= 1 ]
+>>>>>>> 3523a5f69641cb493536383ac7768648779eff32
 ss, ts = np.hsplit(np.array(pairs), 2)
 # plot the results
 plt.scatter(ss, ts, color='orange', cmap='jet', label='$Conjunto \quad factible$', zorder=3, alpha=0.2, edgecolors='none' )
@@ -71,22 +91,38 @@ plt.scatter(ss, ts, color='orange', cmap='jet', label='$Conjunto \quad factible$
 plt.ylim(miny, maxy)
 
 # plot the possible (s, t) pairs
+<<<<<<< HEAD
 pairs = [(s, t) for s in np.linspace(minx, maxx,200)
                 for t in np.linspace(miny, maxy, 200)
+=======
+pairs = [(s, t) for s in np.linspace(minx, maxx,500)
+                for t in np.linspace(miny, maxy, 500)
+>>>>>>> 3523a5f69641cb493536383ac7768648779eff32
                 if np.sqrt(1-(s**2)) == 0]
 ss, ts = np.hsplit(np.array(pairs), 2)
 
 # plot the results
 #plt.scatter(ss, ts,color='gray' , cmap='jet', label='$Region \quad factible$', zorder=3, alpha=0.1,edgecolors='none' )
+<<<<<<< HEAD
 plt.plot( xoptimal[0], xoptimal[1], marker='o', color="red", label='$x^* = [ \\frac{1}{\\sqrt{2}}, \\frac{-1}{\\sqrt{2}}]^T$',markersize= 5 )
+=======
+plt.plot( xoptimal[0], xoptimal[1], marker='o', color="red", label='$x^* = [ \\frac{1}{\\sqrt{2}}, \\frac{1}{\\sqrt{2}}]^T$',markersize= 5 )
+>>>>>>> 3523a5f69641cb493536383ac7768648779eff32
 
 
 pairs = [(d1, d2) for d2 in np.linspace(miny-np.abs(xoptimal[1]), maxy,100)
                 for d1 in np.linspace( minx , maxx+np.abs(xoptimal[0]), 100)
+<<<<<<< HEAD
                 if  abs(d1 - d2) < 0.01 ]
 ss, ts = np.hsplit(np.array(pairs), 2)
 # plot the results
 plt.scatter(ss+xoptimal[0], ts+xoptimal[1], color='black', cmap='jet', label='$\\lambda \\nabla C_1(x^*)^T w = 0 $', zorder=3, alpha=0.7, edgecolors='none' )
+=======
+                if  d1>= d2]
+ss, ts = np.hsplit(np.array(pairs), 2)
+# plot the results
+plt.scatter(ss+xoptimal[0], ts+xoptimal[1], color='black', cmap='jet', label='$Direcciones \quad linealizadas $', zorder=3, alpha=0.1, edgecolors='none' )
+>>>>>>> 3523a5f69641cb493536383ac7768648779eff32
 
 
 
@@ -96,6 +132,7 @@ plt.scatter(ss+xoptimal[0], ts+xoptimal[1], color='black', cmap='jet', label='$\
 style="Simple,tail_width=1.9,head_width=4,head_length=8"
 kw1 = dict(arrowstyle=style, color="b", label='$\\nabla C_1(x^*)$')
 kw3 = dict(arrowstyle=style, color="r", label='$\\nabla f(x^*)$')
+<<<<<<< HEAD
 #kw4 = dict(arrowstyle=style, color="g", label='$\\lambda^* \quad Lagrangiano$')
 
 a1 = patches.FancyArrowPatch((xoptimal[0], xoptimal[1]), (xoptimal[0]+c1optimal[0], xoptimal[1]+c1optimal[1]),**kw1 )
@@ -105,6 +142,17 @@ a3 = patches.FancyArrowPatch((xoptimal[0], xoptimal[1]), (xoptimal[0]+ gradientf
 #a4 = patches.FancyArrowPatch((xoptimal[0], xoptimal[1]), (xoptimal[0]+ lambda1[0], xoptimal[1]+lambda1[1]) ,**kw4 )
 
 for a in [a1,a3]:
+=======
+kw4 = dict(arrowstyle=style, color="g", label='$\\lambda^* \quad Lagrangiano$')
+
+a1 = patches.FancyArrowPatch((xoptimal[0], xoptimal[1]), (xoptimal[0]+ gradientc1[0], xoptimal[1]+gradientc1[1]),**kw1 )
+
+a3 = patches.FancyArrowPatch((xoptimal[0], xoptimal[1]), (xoptimal[0]+ gradientf[0], xoptimal[1]+gradientf[1]) ,**kw3 )
+
+a4 = patches.FancyArrowPatch((xoptimal[0], xoptimal[1]), (xoptimal[0]+ lambda1[0], xoptimal[1]+lambda1[1]) ,**kw4 )
+
+for a in [a1,a3, a4]:
+>>>>>>> 3523a5f69641cb493536383ac7768648779eff32
     plt.gca().add_patch(a)
 
 plt.xlabel('$x_1$', fontsize=16)
