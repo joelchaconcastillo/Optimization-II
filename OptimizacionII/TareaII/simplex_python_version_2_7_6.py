@@ -111,15 +111,18 @@ def generatorrandomMatrix(n, m):
 
 ##Change B by adding q and removing p...
 
-A = matrix([[1, 1, 1, 0], [2, 0.5, 0, 1]])
+A = matrix([[1, 1], [2, 0.5]])
 b = matrix([[5], [8]])
-C = matrix([-3, -2, 0, 0])
+C = matrix([-3, -2])
+print(A)
+print(b)
+print(C)
 #Diet problem...
-A = matrix([[107, 500, 0], [-107, -500, 0], [72, 121, 65],[-72, -121, -65]])
-b = matrix([[5000], [-50000], [20000], [-2250]])
-C = matrix([0.18, 0.23, 0.05])
+#A = matrix([[107, 500, 0], [-107, -500, 0], [72, 121, 65],[-72, -121, -65]])
+#b = matrix([[5000], [-50000], [20000], [-2250]])
+#C = matrix([0.18, 0.23, 0.05])
 
-#A = matrix([[2, 1, 1,1,0,0],[4, 2, 3,0,1,0], [2, 5, 5, 0,0,1]])
+#A = matrix([[2, 1, 1],[4, 2, 3], [2, 5, 5]])
 #b = matrix([[14], [28],[30]])
 #C = matrix([1, 2, -1])
 ##Generate random matrix constraints
