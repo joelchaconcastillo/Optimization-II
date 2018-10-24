@@ -37,16 +37,16 @@ def PrimalDual(A, b, c, ite, errorgrad, errorfit, alphamean, sigma):
    fitness = 1e100
    antnorm = 1e100
    for i in range(0,ite):
-     #alpha = np.random.uniform(alphamean, 0.01, 1)
-     alpha = alphamean
-     alpha = max(0.1, alpha) 
+     alpha = np.random.uniform(alphamean, 0.1, 1)
+     #alpha = alphamean
+     alpha = max(0.0001, alpha) 
      alpha = min(1.0, alpha) 
      S = diags(s)
      X = diags(x) 
      rs = csc_matrix.transpose(A).dot(llambda) + s - c
      rb = A.dot(x) - b
      Mu = (np.dot(s, x)/n)
-     print i, ' ', Mu
+#     print Mu
      XSe = np.multiply(s, x) - (sigma*Mu)*np.ones(n)
      K1 = sparse.hstack([csc_matrix( (n,n)) , csc_matrix.transpose(A) ,I])
      K2 = sparse.hstack([A, csc_matrix( (m,m))  , csc_matrix( (m,n)) ])
@@ -58,28 +58,20 @@ def PrimalDual(A, b, c, ite, errorgrad, errorfit, alphamean, sigma):
      #print '  ',xx.dot(xx)
      while (x + alpha*xx[0:n] <= 0.0).any() or (s + alpha*xx[n+m:2*n+m] <= 0.0).any() :     
 	alpha = alpha/2.0
-     x = x + alpha*xx[0:n]
-     llambda = llambda + alpha*xx[n:(n+m)]
-     s = s + alpha*xx[(n+m): 2*n+m]
-   #  if abs(antnorm - xx.dot(xx)) < errorgrad:
-   #     break
+
+     if (A.dot( x + alpha*xx[0:n]  ) - b).dot((A.dot(x + alpha*xx[0:n]) - b)) < rb.dot(rb) and (x + alpha*xx[0:n]).dot(c) <= x.dot(c) :
+      x = x + alpha*xx[0:n]
+     if (csc_matrix.transpose(A).dot( llambda + alpha*xx[n:(n+m)] ) + alpha*xx[(n+m): 2*n+m] - c).dot(csc_matrix.transpose(A).dot( llambda + alpha*xx[n:(n+m)] ) + alpha*xx[(n+m): 2*n+m] - c) < rs.dot(rs):
+      llambda = llambda + alpha*xx[n:(n+m)]
+      s = s + alpha*xx[(n+m): 2*n+m]
+     #if abs(antnorm - xx.dot(xx)) < errorgrad:
+     #print xx[0:n].dot(xx[0:n])
+     if xx[0:n].dot(xx[0:n]) < errorgrad:
+        break
    #  antnorm = xx.dot(xx)
    #  if abs(fitness - c.dot(x)) < errorfit:
    #     break
      fitness = c.dot(x)
+           
+ 
    return x, np.transpose(c).dot(x), i
-
-#A = csc_matrix( [ [3,1,1,0], [1, 1,0,1]] , dtype=float)
-#c = np.array([1, -4, 0,0])
-#b = np.array([6, 4])
-##
-#print "solution"
-#print LongStepPath(A, b, c, 10000, 1e-240, 1e-240)
-###
-#x0_bnds = (0, None)
-#x1_bnds = (0, None)
-#x2_bnds = (0, None)
-#x3_bnds = (0, None)
-#res = linprog(c, A_eq=A.toarray(), b_eq=b, bounds=(x0_bnds, x1_bnds, x2_bnds, x3_bnds))
-##res = linprog(c, A_ub = A.toarray(),b_ub= b, bounds=(0, None))
-#print(res)
