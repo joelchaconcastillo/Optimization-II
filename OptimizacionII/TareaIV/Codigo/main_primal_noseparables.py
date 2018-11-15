@@ -20,36 +20,48 @@ import matplotlib.pyplot as plt
 ##Generate matrix
 
 def GenerateProblemPrimalSVM(N):
- I = [[0.1, 0.5], [1, 1]]
- mu1 = [10, 10]
- mu2 = [15, 15]
+ np.random.seed(2)
+ I = [[0.5, 0], [0, 0.5]]
+ mu1 = [-1, -1]
+ mu2 = [1, 1]
  d = 2
- epsilon = 1e-5
+ C = 0.1
+ epsilon = 1e-10
  x1 = np.random.multivariate_normal( mu1,I , N)
  x2 = np.random.multivariate_normal( mu2,I, N)
  
  G = np.identity(d+2*N+1)
- G[d:d+2*N+1, d:d+2*N+1]=1e-5
+ G[d:d+2*N+1,d:d+2*N+1]= G[d:d+2*N+1,d:d+2*N+1]*epsilon
  G = csc_matrix(G)
  x1 = np.column_stack((x1, np.ones(N)))
  x2 = np.column_stack((x2, np.ones(N)))
  A = csc_matrix(np.concatenate((x1, -x2), axis=0))
- A = csc_matrix(sparse.hstack([A, np.identity(2*N)]))
- print np.shape(A.toarray())
- b = np.ones(d+2*N+1)
- print np.shape(b)
+ A1 = csc_matrix(sparse.hstack([A, np.identity(2*N)]))
+ A2 = csc_matrix(sparse.hstack([csc_matrix( (2*N,d+1)) , np.identity(2*N)]))
+ A = csc_matrix(sparse.vstack([A1, A2]))
+ b = np.ones(4*N)
+ b[2*N:4*N]=0
  c = np.zeros(d+2*N+1)
- c[d+1:d+1+2*N]=1
- print c
+ c[d+1:d+1+2*N]=C
+# G = np.identity(d+2*N+1)
+# G[d:d+2*N+1,d:d+2*N+1]= G[d:d+2*N+1,d:d+2*N+1]*epsilon
+# G = csc_matrix(G)
+# x1 = np.column_stack((x1, np.ones(N)))
+# x2 = np.column_stack((x2, np.ones(N)))
+# A = csc_matrix(np.concatenate((x1, -x2), axis=0))
+# A = csc_matrix(sparse.hstack([A, np.identity(2*N)]))
+# b = np.ones(2*N)
+# c = np.zeros(d+2*N+1)
+# c[d+1:d+1+2*N]=C
+
  return G, A, b, c, x1, x2
 n = 2
 m = 2
 span = 10
-Maxite = 100
-errorgradiente = 1e-100
+Maxite = 1000
+errorgradiente = 1e-10
 mindeltafitness = 1e-100
 sigma = 0.01
-
 
 
 for k in range(1,2):
@@ -57,15 +69,14 @@ for k in range(1,2):
  
 # #####Performance runing.....
  start = timeit.default_timer()
- [G, A, b, c, d1, d2] = GenerateProblemPrimalSVM(3)
+ N=100
+ [G, A, b, c, d1, d2] = GenerateProblemPrimalSVM(N)
  x, fitnes, ite, llambda, y = PredictorCorrectorQPSolver(G, A, b, c, Maxite, errorgradiente, mindeltafitness, eta=0.95)
  stop = timeit.default_timer()
- Y=-np.ones(200)
- Y[100:200]=1 
- print y
- print llambda.dot(y)
- print fitnes
- print x
+ Y=-np.ones(N)
+ Y[N:2*N]=1 
+ x = x[0:3]
+ 
  plt.plot(d1[:,0], d1[:,1],'.', markersize=12)
  plt.plot(d2[:,0], d2[:,1],'.',markersize=12 )
  alldata = np.concatenate((d1, d2))
@@ -78,3 +89,9 @@ for k in range(1,2):
  xmax = max( alldata[:,0])
  plt.plot( [xmin, xmax], [ (-x[2]-xmin*x[0])/x[1] ,  (-x[2]-xmax*x[0])/x[1] ] , linestyle='solid')
  plt.show()
+ print "tiempo"
+ print stop-start
+ print "iteeraciones"
+ print ite
+ print "funcion objetivo"
+ print fitnes

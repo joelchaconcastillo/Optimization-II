@@ -14,9 +14,9 @@ from scipy.optimize import linprog
 
 def InitialPoints(G, A, b, c):
      (m, n) = np.shape(A)
-     x = np.ones(n)
-     y = np.ones(m)
-     llambda = np.zeros(m)
+     x = np.ones(n)+1
+     y = np.ones(m)+1
+     llambda = np.zeros(m)+1
      I = identity(m, dtype=float)
      Y = diags(y)
      La = diags(llambda) 
@@ -29,6 +29,7 @@ def InitialPoints(G, A, b, c):
      K = csc_matrix(sparse.vstack([K1, K2, K3]))
      bb = np.concatenate((-rd,-rp, -LaYe))
      deltaAffin = spsolve(K, bb)
+
      deltaxAffin = deltaAffin[0:n] 
      deltayAffin = deltaAffin[n:n+m]
      deltalambdaAffin = deltaAffin[n+m:2*m+n] 
@@ -42,10 +43,11 @@ def PredictorCorrectorQPSolver(G, A, b, c, ite, errorgrad, errorfit, eta):
    I = identity(m, dtype=float)
    fitness = 1e100
    antnorm = 1e100
+#   llambda = llambda*0
    for i in range(0,ite):
      ###1
      Y = diags(y)
-     La = diags(llambda) 
+     La = diags(llambda)
      rd = G.dot(x) - csc_matrix.transpose(A).dot(llambda) + c
      rp = A.dot(x) - y - b
      LaYe = np.multiply(llambda, y)
@@ -82,7 +84,7 @@ def PredictorCorrectorQPSolver(G, A, b, c, ite, errorgrad, errorfit, eta):
      deltaxcorr = deltacorr[0:n] 
      deltaycorr = deltacorr[n:n+m]
      deltalambdacorr = deltacorr[n+m:2*m+n] 
-     tao = 0.2
+     tao = 0.5
      alpha_tao_pri = 1  
      alpha_tao_dual = 1
      if any(deltaycorr<0):
@@ -96,12 +98,12 @@ def PredictorCorrectorQPSolver(G, A, b, c, ite, errorgrad, errorfit, eta):
 
      alpha = min(alpha_tao_pri, alpha_tao_dual)
      x2 = x + alpha*deltaxcorr
-     if x2.dot(x2) < errorgrad:
+     if deltaxcorr.dot(deltaxcorr) < errorgrad:
   	break    
-#     if (x.T).dot(G.dot(x))*0.5 + c.dot(x) < (x2.T).dot(G.dot(x2))*0.5 + c.dot(x2):
+    # if (x.T).dot(G.dot(x))*0.5 + c.dot(x) > (x2.T).dot(G.dot(x2))*0.5 + c.dot(x2):
      x = x2#x + alpha*deltaxcorr
-     # fitness = (x2.T).dot(G.dot(x2))*0.5 + c.dot(x2)
+     fitness = (x2.T).dot(G.dot(x2))*0.5 + c.dot(x2)
+#     print fitness
      y = y + alpha*deltaycorr
      llambda = llambda + alpha*deltalambdacorr
-     #print fitness
    return x, (x.T).dot(G.dot(x))*0.5 + c.dot(x), i, y, llambda
