@@ -4,6 +4,7 @@ import math
 import scipy.stats as ss
 from sklearn import linear_model, preprocessing
 from pgm import pgmread, pgmwrite
+from ADMM_LASSO import ADDM_LASSO
 import sys
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
@@ -24,6 +25,7 @@ def  buildDictionary(inImage, ix, jx, Lw, Nw):
       D[:,i] =  submatrix #inImage[range(pivot1,pivot1+Lw), range(pivot2,pivot2+Lw)]
    return D       
 def solveProblem(Y, D):
+   return ADDM_LASSO(np.array(D), np.array(Y), 100, 2)
    clf = linear_model.Lasso(alpha=2)
    clf.fit(D, Y)
    return clf.coef_
